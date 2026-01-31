@@ -6,7 +6,9 @@ import { RegisterPage } from './pages/RegisterPage';
 import { ShopPage } from './pages/ShopPage';
 import { ProductPage } from './pages/ProductPage';
 import { CartPage } from './pages/CartPage';
+import { AdminPage } from './pages/AdminPage';
 import { PageView, Product, CartItem, User } from './types';
+import { initDB } from './lib/storage';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<PageView>(PageView.HOME);
@@ -15,8 +17,9 @@ const App: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initial Preloader
+  // Initial Preloader & DB Init
   useEffect(() => {
+    initDB(); // Initialize LocalStorage DB
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 2500);
@@ -28,15 +31,19 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   }, [currentPage]);
 
-  const handleLogin = (name: string) => {
-    setUser({ name, email: '' });
-    setCurrentPage(PageView.SHOP);
+  const handleLogin = (name: string, isAdmin: boolean = false) => {
+    setUser({ name, email: '', isAdmin });
+    setCurrentPage(isAdmin ? PageView.ADMIN : PageView.SHOP);
   };
 
   const handleNavigate = (page: PageView) => {
     if ((page === PageView.SHOP || page === PageView.CART || page === PageView.PRODUCT_DETAIL) && !user) {
       setCurrentPage(PageView.REGISTER);
       return;
+    }
+    // Protect Admin Route
+    if (page === PageView.ADMIN && (!user || !user.isAdmin)) {
+        return; 
     }
     setCurrentPage(page);
   };
@@ -104,6 +111,8 @@ const App: React.FC = () => {
           onNavigate={handleNavigate} 
           onClearCart={clearCart}
         />;
+      case PageView.ADMIN:
+        return <AdminPage />;
       default:
         return <HomePage onNavigate={handleNavigate} isAuthenticated={!!user} />;
     }
@@ -116,6 +125,7 @@ const App: React.FC = () => {
         currentPage={currentPage}
         onNavigate={handleNavigate}
         isAuthenticated={!!user}
+        isAdmin={user?.isAdmin}
       />
       
       <main className="flex-grow relative">
