@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ShoppingBag, User as UserIcon, Menu, X, ArrowRight } from 'lucide-react';
+import { ShoppingBag, User as UserIcon, Menu, X, ArrowRight, Settings } from 'lucide-react';
 import { PageView } from '../types';
 
 interface NavbarProps {
@@ -7,9 +7,10 @@ interface NavbarProps {
   currentPage: PageView;
   onNavigate: (page: PageView) => void;
   isAuthenticated: boolean;
+  isAdmin?: boolean;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ cartCount, currentPage, onNavigate, isAuthenticated }) => {
+export const Navbar: React.FC<NavbarProps> = ({ cartCount, currentPage, onNavigate, isAuthenticated, isAdmin }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -73,6 +74,14 @@ export const Navbar: React.FC<NavbarProps> = ({ cartCount, currentPage, onNaviga
                   className={`text-[11px] uppercase tracking-[0.2em] font-bold hover:text-brand-orange transition-colors ${currentPage === PageView.SHOP || currentPage === PageView.PRODUCT_DETAIL ? 'text-brand-orange' : 'text-gray-400'}`}
                 >
                   Каталог
+                </button>
+              )}
+              {isAdmin && (
+                 <button 
+                  onClick={() => handleNav(PageView.ADMIN)}
+                  className={`text-[11px] uppercase tracking-[0.2em] font-bold hover:text-brand-orange transition-colors ${currentPage === PageView.ADMIN ? 'text-brand-orange' : 'text-red-500'}`}
+                >
+                  Админ
                 </button>
               )}
               {!isAuthenticated && (
@@ -159,6 +168,19 @@ export const Navbar: React.FC<NavbarProps> = ({ cartCount, currentPage, onNaviga
                 >
                   Каталог
                 </MobileMenuItem>
+                
+                {isAdmin && (
+                    <MobileMenuItem 
+                    onClick={() => handleNav(PageView.ADMIN)} 
+                    active={currentPage === PageView.ADMIN} 
+                    isOpen={isMobileMenuOpen}
+                    index={1}
+                    highlight
+                    >
+                    Админ Панель
+                    </MobileMenuItem>
+                )}
+
                 <MobileMenuItem 
                   onClick={() => handleNav(PageView.CART)} 
                   active={currentPage === PageView.CART} 
