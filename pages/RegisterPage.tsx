@@ -4,21 +4,31 @@ import { ArrowLeft, User, Lock, Mail } from 'lucide-react';
 
 interface RegisterPageProps {
   onNavigate: (page: PageView) => void;
-  onLogin: (name: string) => void;
+  onLogin: (name: string, isAdmin?: boolean) => void;
 }
 
 export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate, onLogin }) => {
   const [isLogin, setIsLogin] = useState(true); // Toggle state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
+
+    // Admin Check
+    if (isLogin && email === 'admin@email.com' && password === '123123123') {
+       setTimeout(() => {
+         onLogin("Администратор", true);
+       }, 1000);
+       return;
+    }
+
+    // Regular User Simulation
     setTimeout(() => {
-      onLogin(name || "Пользователь");
+      onLogin(name || "Пользователь", false);
     }, 1500);
   };
 
@@ -103,6 +113,8 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate, onLogin 
                   <Lock className="absolute left-4 top-3.5 h-5 w-5 text-gray-500 group-focus-within:text-brand-orange transition-colors" />
                   <input 
                     type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
                     className="w-full bg-black/40 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder-gray-600 focus:outline-none focus:border-brand-orange transition-colors text-sm"
                     placeholder="Пароль"
