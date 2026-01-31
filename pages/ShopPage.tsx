@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { PRODUCTS } from '../constants';
-import { Product, PageView } from '../types';
+import React, { useState, useMemo, useEffect } from 'react';
+import { getProducts } from '../lib/storage';
+import { Product } from '../types';
 import { Search } from 'lucide-react';
 
 interface ShopPageProps {
@@ -8,24 +8,29 @@ interface ShopPageProps {
 }
 
 export const ShopPage: React.FC<ShopPageProps> = ({ onProductClick }) => {
+  const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('Все');
+
+  // Fetch products from "DB" on mount
+  useEffect(() => {
+    setProducts(getProducts());
+  }, []);
 
   const categories = ['Все', 'Костюмы', 'Верхняя одежда', 'Повседневное', 'Обувь', 'Аксессуары'];
 
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter(product => {
+    return products.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = activeCategory === 'Все' || product.category === activeCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [searchTerm, activeCategory]);
+  }, [searchTerm, activeCategory, products]);
 
   return (
     <div className="min-h-screen pt-24 bg-brand-black">
       
       {/* Header with Glass Droplet Menu */}
-      {/* Changed: 'sticky top-24' -> 'relative md:sticky md:top-24' */}
       <div className="relative md:sticky md:top-24 z-30 glass-panel border-b border-white/5 mb-12">
          <div className="max-w-7xl mx-auto px-6 lg:px-12 py-6">
             <div className="flex flex-col items-center space-y-8">
@@ -42,11 +47,9 @@ export const ShopPage: React.FC<ShopPageProps> = ({ onProductClick }) => {
                       <span className={`relative z-10 text-xs font-bold uppercase tracking-widest transition-colors duration-300 ${activeCategory === cat ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>
                         {cat}
                       </span>
-                      {/* Active State Background */}
                       {activeCategory === cat && (
                         <div className="absolute inset-0 bg-brand-orange rounded-full"></div>
                       )}
-                      {/* Hover State Background */}
                       {activeCategory !== cat && (
                         <div className="absolute inset-0 bg-white/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       )}
@@ -81,7 +84,6 @@ export const ShopPage: React.FC<ShopPageProps> = ({ onProductClick }) => {
               className="group cursor-pointer animate-slide-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              {/* Image Container with Sharp Hover Effect */}
               <div className="relative aspect-[3/4] overflow-hidden mb-6 bg-brand-paper">
                 <div className="absolute inset-0 bg-black/20 z-10 group-hover:bg-transparent transition-colors duration-500"></div>
                 <img 
@@ -90,11 +92,7 @@ export const ShopPage: React.FC<ShopPageProps> = ({ onProductClick }) => {
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-90 group-hover:opacity-100"
                   loading="lazy"
                 />
-                
-                {/* Minimalist Border Hover */}
                 <div className="absolute inset-4 border border-white/30 opacity-0 group-hover:opacity-100 transition-all duration-500 scale-95 group-hover:scale-100 z-20"></div>
-
-                {/* View Button */}
                 <div className="absolute bottom-0 left-0 w-full bg-brand-orange/90 backdrop-blur text-white py-4 text-center text-xs font-bold tracking-[0.2em] uppercase translate-y-full group-hover:translate-y-0 transition-transform duration-500 z-30">
                    Смотреть
                 </div>
